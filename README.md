@@ -150,6 +150,4 @@ CodeMask executes entirely within the client's local browser environment. No net
 
 ---
 
-## License
 
-This project is licensed under the MIT License.
