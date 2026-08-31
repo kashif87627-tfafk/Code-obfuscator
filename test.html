@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Obfuscator Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #eee; }
+    textarea, pre { width: 100%; min-height: 200px; padding: 10px; background: #000; color: #0f0; border: 1px solid #333; }
+    button { padding: 10px 20px; margin: 10px 5px; font-size: 14px; cursor: pointer; }
+    .section { margin: 20px 0; border: 1px solid #555; padding: 15px; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Obfuscator Engine Test</h1>
+
+  <div class="section">
+    <h3>Input Code</h3>
+    <textarea id="input">function usercoins() {
+  int coins = 99;
+  int premium = 0;
+}</textarea>
+    <button onclick="test()">⚡ RUN TEST</button>
+  </div>
+
+  <div class="section">
+    <h3>Obfuscated Output</h3>
+    <pre id="output-obf">// Click RUN TEST...</pre>
+  </div>
+
+  <div class="section">
+    <h3>Map JSON</h3>
+    <pre id="output-map">// Click RUN TEST...</pre>
+  </div>
+
+  <div class="section">
+    <h3>Console Log</h3>
+    <pre id="log"></pre>
+  </div>
+
+  <script src="obfuscator.js?v=2"></script>
+  <script>
+    const log = document.getElementById('log');
+    function addLog(msg) {
+      log.textContent += msg + '\n';
+      console.log(msg);
+    }
+
+    addLog('[INIT] Page loaded');
+    addLog('[INIT] typeof obfuscate: ' + typeof obfuscate);
+    addLog('[INIT] typeof deobfuscate: ' + typeof deobfuscate);
+
+    function test() {
+      addLog('\n[TEST] Starting...');
+      const src = document.getElementById('input').value;
+      addLog('[TEST] Input length: ' + src.length);
+
+      try {
+        addLog('[TEST] Calling obfuscate()...');
+        const result = obfuscate(src);
+        addLog('[TEST] Result received');
+        addLog('[TEST] Obfuscated length: ' + result.obfuscated.length);
+        addLog('[TEST] Map keys: ' + Object.keys(result.mapObj).length);
+
+        document.getElementById('output-obf').textContent = result.obfuscated;
+        document.getElementById('output-map').textContent = JSON.stringify(result.mapObj, null, 2);
+
+        addLog('[TEST] ✅ SUCCESS!');
+      } catch(e) {
+        addLog('[TEST] ❌ ERROR: ' + e.message);
+        addLog('[TEST] Stack: ' + e.stack);
+      }
+    }
+  </script>
+</body>
+</html>

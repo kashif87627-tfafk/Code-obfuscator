@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Obfuscator - Multi Language (JS, C, Python)</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+    textarea, pre { width: 100%; min-height: 150px; padding: 10px; background: #000; color: #0f0; border: 1px solid #0f0; }
+    button { padding: 10px 20px; margin: 10px 0; font-size: 16px; background: #0f0; color: #000; border: none; cursor: pointer; }
+    h3 { color: #0ff; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Obfuscator (Supports JS, C/C++, Java, Python)</h1>
+
+  <h3>Input (Paste JS, C, or Python):</h3>
+  <textarea id="input">def binary_search_position(arr, val, start, end):
+    """Finds the correct index to insert 'val' in the sorted portion of arr."""
+    while start <= end:
+        mid = (start + end) // 2
+        if arr[mid] == val:
+            return mid + 1
+        elif arr[mid] < val:
+            start = mid + 1
+        else:
+            end = mid - 1
+    return start</textarea>
+  <button onclick="test()">⚡ OBFUSCATE NOW</button>
+
+  <h3>Obfuscated:</h3>
+  <pre id="output"></pre>
+
+  <h3>Map JSON:</h3>
+  <pre id="map"></pre>
+
+  <script src="obfuscator.js?v=3"></script>
+  <script>
+    function test() {
+      const src = document.getElementById('input').value;
+      const result = obfuscate(src);
+      document.getElementById('output').textContent = result.obfuscated;
+      document.getElementById('map').textContent = JSON.stringify(result.mapObj, null, 2);
+    }
+  </script>
+</body>
+</html>

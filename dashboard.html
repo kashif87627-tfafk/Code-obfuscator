@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeMask - Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* Navbar */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 28px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .navbar-brand { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .navbar-brand span { color: var(--accent); }
+    .navbar-right { display: flex; align-items: center; gap: 14px; }
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 5px 14px 5px 8px; font-size: 13px;
+    }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 12px; color: #fff;
+    }
+
+    /* Mode tabs */
+    .mode-bar {
+      display: flex; gap: 0;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+    }
+    .mode-btn {
+      background: none; border: none; border-bottom: 3px solid transparent;
+      color: var(--muted); padding: 14px 22px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: color 0.18s, border-color 0.18s;
+    }
+    .mode-btn:hover { color: var(--text); }
+    .mode-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* Content panels */
+    .tab-content { display: none; flex: 1; }
+    .tab-content.active { display: flex; flex-direction: column; }
+
+    /* Workspace layout */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 22px 28px;
+      flex: 1;
+    }
+
+    .stats-strip {
+      grid-column: 1 / -1;
+      display: flex; gap: 14px;
+    }
+    .stat-card {
+      flex: 1;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 13px 16px;
+    }
+    .stat-val { font-size: 24px; font-weight: 800; color: var(--accent); line-height: 1; }
+    .stat-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-top: 4px; }
+
+    .full-col { grid-column: 1 / -1; }
+
+    /* Code panel */
+    .code-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex; flex-direction: column; overflow: hidden;
+      min-height: 240px;
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 14px; border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .panel-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--muted);
+    }
+    .badge {
+      font-size: 10px; padding: 2px 8px; border-radius: 999px; font-weight: 700;
+      margin-left: 8px;
+    }
+    .badge-in  { background: rgba(108,99,255,0.18); color: var(--accent); }
+    .badge-out { background: rgba(0,229,160,0.15);  color: var(--success); }
+    .badge-map { background: rgba(255,179,71,0.15); color: #ffb347; }
+    .badge-rev { background: rgba(255,83,112,0.15); color: var(--danger); }
+    .panel-actions { display: flex; gap: 7px; }
+
+    .code-panel textarea,
+    .code-panel pre {
+      flex: 1; margin: 0; border: none; border-radius: 0;
+      background: var(--code-bg);
+      font-family: var(--font-mono); font-size: 13px; line-height: 1.75;
+      color: var(--text); padding: 15px 16px; resize: none; outline: none;
+    }
+    .code-panel pre { overflow: auto; white-space: pre; }
+    .ph { color: var(--muted); font-style: italic; }
+
+    /* Action bar */
+    .action-bar {
+      grid-column: 1 / -1;
+      display: flex; align-items: center; justify-content: center; gap: 14px;
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      background: var(--surface); padding: 28px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 12px; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+      text-align: center;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(108,99,255,0.06); }
+    .upload-zone p { font-size: 14px; color: var(--muted); margin: 0; }
+    .upload-zone strong { color: var(--text); }
+    .upload-zone input[type=file] { display: none; }
+    #loaded-file-name { font-size: 12px; color: var(--success); margin-top: 6px; }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 26px; right: 26px;
+      background: var(--success); color: #0f1117;
+      font-weight: 700; font-size: 13px; padding: 10px 20px;
+      border-radius: var(--radius); opacity: 0;
+      transition: opacity 0.22s; pointer-events: none; z-index: 999;
+    }
+    #toast.show { opacity: 1; }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .workspace { grid-template-columns: 1fr; }
+      .stats-strip { flex-wrap: wrap; }
+      .mode-bar { padding: 0 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-brand">Code<span>Mask</span></div>
+  <div class="navbar-right">
+    <span style="font-size: 13px; color: var(--muted);">v2.1</span>
+  </div>
+</nav>
+
+<!-- Mode tabs -->
+<div class="mode-bar">
+  <button class="mode-btn active" id="tab-obf"   onclick="switchMode('obf')">Obfuscate</button>
+  <button class="mode-btn"        id="tab-deobf" onclick="switchMode('deobf')">De-obfuscate</button>
+</div>
+
+<!-- TAB 1 - OBFUSCATE -->
+<div class="tab-content active" id="content-obf">
+  <div class="workspace">
+
+    <!-- Stats -->
+    <div class="stats-strip">
+      <div class="stat-card"><div class="stat-val" id="o-stat-names">0</div><div class="stat-lbl">Identifiers renamed</div></div>
+      <div class="stat-card"><div class="stat-val" id="o-stat-lines">0</div><div class="stat-lbl">Lines processed</div></div>
+      <div class="stat-card"><div class="stat-val" id="o-stat-chars">0</div><div class="stat-lbl">Characters</div></div>
+      <div class="stat-card"><div class="stat-val" id="o-stat-runs">0</div> <div class="stat-lbl">Runs this session</div></div>
+    </div>
+
+    <!-- Input -->
+    <div class="code-panel full-col">
+      <div class="panel-head">
+        <div class="panel-title">Input Code<span class="badge badge-in">PASTE YOUR CODE</span></div>
+        <div style="font-size: 12px; color: var(--muted);">Supported: JavaScript, Python, C, C++, Java, C#</div>
+        <div class="panel-actions">
+          <button class="btn btn-ghost" style="font-size:12px;padding:5px 11px" onclick="loadExample()">Load Example</button>
+          <button class="btn btn-ghost" style="font-size:12px;padding:5px 11px" onclick="clearObf()">Clear</button>
+        </div>
+      </div>
+      <textarea id="obf-input" rows="10" placeholder="Paste your code here (supports JS, C/C++, Java, Python)..."></textarea>
+    </div>
+
+    <!-- Action -->
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="runObfuscate()" style="padding:12px 40px;font-size:15px">Obfuscate Code</button>
+    </div>
+
+    <!-- Output: obfuscated code -->
+    <div class="code-panel">
+      <div class="panel-head">
+        <div class="panel-title">Obfuscated Code<span class="badge badge-out">OUTPUT 1</span></div>
+        <div class="panel-actions">
+          <button class="btn btn-ghost" style="font-size:12px;padding:5px 11px" onclick="copyEl('obf-out')">Copy</button>
+        </div>
+      </div>
+      <pre id="obf-out"><span class="ph">Obfuscated code will appear here...</span></pre>
+    </div>
+
+    <!-- Output: map JSON -->
+    <div class="code-panel">
+      <div class="panel-head">
+        <div class="panel-title">Decode Map<span class="badge badge-map">OUTPUT 2 - JSON</span></div>
+        <div class="panel-actions">
+          <button class="btn btn-ghost"    style="font-size:12px;padding:5px 11px" onclick="copyEl('map-out')">Copy</button>
+          <button class="btn btn-success"  style="font-size:12px;padding:5px 11px" onclick="downloadMap()">Download JSON</button>
+        </div>
+      </div>
+      <pre id="map-out"><span class="ph">Decode map (JSON) will appear here...</span></pre>
+    </div>
+
+  </div>
+</div>
+
+<!-- TAB 2 - DE-OBFUSCATE -->
+<div class="tab-content" id="content-deobf">
+  <div class="workspace">
+
+    <!-- Stats -->
+    <div class="stats-strip">
+      <div class="stat-card"><div class="stat-val" id="d-stat-names">0</div><div class="stat-lbl">Names restored</div></div>
+      <div class="stat-card"><div class="stat-val" id="d-stat-lines">0</div><div class="stat-lbl">Lines processed</div></div>
+      <div class="stat-card"><div class="stat-val" id="d-stat-chars">0</div><div class="stat-lbl">Characters</div></div>
+      <div class="stat-card"><div class="stat-val" id="d-stat-runs">0</div> <div class="stat-lbl">Runs this session</div></div>
+    </div>
+
+    <!-- Obfuscated code input -->
+    <div class="code-panel">
+      <div class="panel-head">
+        <div class="panel-title">Obfuscated Code<span class="badge badge-in">PASTE HERE</span></div>
+        <div class="panel-actions">
+          <button class="btn btn-ghost" style="font-size:12px;padding:5px 11px" onclick="clearDeobf()">Clear</button>
+        </div>
+      </div>
+      <textarea id="deobf-input" rows="10" placeholder="Paste obfuscated code here..."></textarea>
+    </div>
+
+    <!-- Map JSON upload -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="upload-zone" id="drop-zone"
+           onclick="document.getElementById('map-file-input').click()"
+           ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <p><strong>Upload decode-map.json</strong><br>Click or drag and drop your map file here</p>
+        <input type="file" id="map-file-input" accept=".json,application/json" onchange="onFileSelect(event)" />
+      </div>
+      <div id="loaded-file-name"></div>
+
+      <!-- Or paste JSON manually -->
+      <div class="code-panel" style="min-height:140px">
+        <div class="panel-head">
+          <div class="panel-title">Or Paste Map JSON<span class="badge badge-map">MANUAL</span></div>
+        </div>
+        <textarea id="map-json-input" rows="5" placeholder='{"xKqP7w": "coins", "bRtLmn": "usercoins"}'></textarea>
+      </div>
+    </div>
+
+    <!-- Action -->
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="runDeobfuscate()" style="padding:12px 40px;font-size:15px">Restore Code</button>
+    </div>
+
+    <!-- Restored code output -->
+    <div class="code-panel full-col">
+      <div class="panel-head">
+        <div class="panel-title">Restored Code<span class="badge badge-rev">OUTPUT</span></div>
+        <div class="panel-actions">
+          <button class="btn btn-ghost" style="font-size:12px;padding:5px 11px" onclick="copyEl('deobf-out')">Copy</button>
+          <button class="btn btn-success" style="font-size:12px;padding:5px 11px" onclick="downloadRestored()">Download</button>
+        </div>
+      </div>
+      <pre id="deobf-out"><span class="ph">Restored code will appear here...</span></pre>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast">Done</div>
+
+<script src="obfuscator.js?v=3"></script>
+<script>
+// State
+let lastMapJSON     = '';
+let lastRestoredSrc = '';
+let obfRuns = 0, deobfRuns = 0;
+
+// Mode switching
+function switchMode(mode) {
+  ['obf','deobf'].forEach(m => {
+    document.getElementById('tab-' + m).classList.toggle('active', m === mode);
+    document.getElementById('content-' + m).classList.toggle('active', m === mode);
+  });
+}
+
+// OBFUSCATE
+function runObfuscate() {
+  const src = document.getElementById('obf-input').value;
+  if (!src.trim()) { showToast('Please paste some code first', '#ff5370'); return; }
+
+  let result;
+  try {
+    result = obfuscate(src);
+  } catch(e) {
+    showToast('Engine error: ' + e.message, '#ff5370');
+    console.error(e);
+    return;
+  }
+
+  const { obfuscated, mapObj } = result;
+  const mapJSON = JSON.stringify(mapObj, null, 2);
+  lastMapJSON = mapJSON;
+
+  document.getElementById('obf-out').textContent = obfuscated;
+  document.getElementById('map-out').textContent = mapJSON;
+
+  const count = Object.keys(mapObj).length;
+  document.getElementById('o-stat-names').textContent = count;
+  document.getElementById('o-stat-lines').textContent = src.split('\n').length;
+  document.getElementById('o-stat-chars').textContent = src.length;
+  document.getElementById('o-stat-runs').textContent  = ++obfRuns;
+
+  showToast('Obfuscated - ' + count + ' identifiers renamed');
+}
+
+function clearObf() {
+  document.getElementById('obf-input').value = '';
+  document.getElementById('obf-out').innerHTML = '<span class="ph">Obfuscated code will appear here...</span>';
+  document.getElementById('map-out').innerHTML = '<span class="ph">Decode map (JSON) will appear here...</span>';
+  lastMapJSON = '';
+  ['o-stat-names','o-stat-lines','o-stat-chars'].forEach(id =>
+    document.getElementById(id).textContent = '0');
+}
+
+// Download map JSON
+function downloadMap() {
+  if (!lastMapJSON) { showToast('Run obfuscation first', '#ff5370'); return; }
+  triggerDownload(lastMapJSON, 'decode-map.json', 'application/json');
+  showToast('decode-map.json downloaded');
+}
+
+// DE-OBFUSCATE
+function runDeobfuscate() {
+  const src     = document.getElementById('deobf-input').value;
+  const mapText = document.getElementById('map-json-input').value.trim();
+
+  if (!src.trim()) { showToast('Paste obfuscated code first', '#ff5370'); return; }
+  if (!mapText)    { showToast('Provide the decode map JSON', '#ff5370'); return; }
+
+  let decodeMap;
+  try {
+    decodeMap = JSON.parse(mapText);
+  } catch(e) {
+    showToast('Invalid JSON in map field', '#ff5370'); return;
+  }
+
+  if (typeof decodeMap !== 'object' || Array.isArray(decodeMap)) {
+    showToast('Map must be a plain JSON object', '#ff5370'); return;
+  }
+
+  let restored;
+  try {
+    restored = deobfuscate(src, decodeMap);
+  } catch(e) {
+    showToast('Engine error: ' + e.message, '#ff5370');
+    console.error(e); return;
+  }
+
+  lastRestoredSrc = restored;
+  document.getElementById('deobf-out').textContent = restored;
+
+  const count = Object.keys(decodeMap).length;
+  document.getElementById('d-stat-names').textContent = count;
+  document.getElementById('d-stat-lines').textContent = src.split('\n').length;
+  document.getElementById('d-stat-chars').textContent = src.length;
+  document.getElementById('d-stat-runs').textContent  = ++deobfRuns;
+
+  showToast('Code restored - ' + count + ' names mapped back');
+}
+
+function downloadRestored() {
+  if (!lastRestoredSrc) { showToast('Run de-obfuscation first', '#ff5370'); return; }
+  triggerDownload(lastRestoredSrc, 'restored-code.txt', 'text/plain');
+  showToast('restored-code.txt downloaded');
+}
+
+function clearDeobf() {
+  document.getElementById('deobf-input').value   = '';
+  document.getElementById('map-json-input').value = '';
+  document.getElementById('deobf-out').innerHTML  = '<span class="ph">Restored code will appear here...</span>';
+  document.getElementById('loaded-file-name').textContent = '';
+  lastRestoredSrc = '';
+  ['d-stat-names','d-stat-lines','d-stat-chars'].forEach(id =>
+    document.getElementById(id).textContent = '0');
+}
+
+// File upload (JSON map)
+function onFileSelect(ev) {
+  const file = ev.target.files[0];
+  if (file) readMapFile(file);
+}
+
+function onDragOver(ev) {
+  ev.preventDefault();
+  document.getElementById('drop-zone').classList.add('drag');
+}
+function onDragLeave() {
+  document.getElementById('drop-zone').classList.remove('drag');
+}
+function onDrop(ev) {
+  ev.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  const file = ev.dataTransfer.files[0];
+  if (file) readMapFile(file);
+}
+
+function readMapFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    document.getElementById('map-json-input').value = text;
+    document.getElementById('loaded-file-name').textContent = 'Loaded: ' + file.name;
+    showToast('Map file loaded: ' + file.name);
+  };
+  reader.readAsText(file);
+}
+
+// Utilities
+function copyEl(id) {
+  const text = document.getElementById(id).textContent;
+  if (!text.trim() || document.getElementById(id).querySelector('.ph')) {
+    showToast('Nothing to copy yet', '#ff5370'); return;
+  }
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+}
+
+function triggerDownload(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function showToast(msg, bg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = bg || 'var(--success)';
+  t.style.color = bg ? '#fff' : '#0f1117';
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function loadExample() {
+  document.getElementById('obf-input').value =
+`function usercoins() {
+  int coins = 99;
+  int premium = 0;
+  return coins;
+}
+
+function addCoins(amount) {
+  int total = usercoins() + amount;
+  bool isPremium = (premium > 0);
+  return total;
+}
+
+class PlayerData {
+  int health = 100;
+  int score  = 0;
+  bool alive = true;
+}`;
+}
+</script>
+</body>
+</html>

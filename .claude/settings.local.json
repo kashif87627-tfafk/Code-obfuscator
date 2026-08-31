@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Start-Process \"C:\\\\Users\\\\mdk80\\\\OneDrive\\\\Desktop\\\\devops\\\\index.html\")",
+      "PowerShell(node C:\\\\Users\\\\mdk80\\\\OneDrive\\\\Desktop\\\\devops\\\\test.js)",
+      "PowerShell(Start-Process \"C:\\\\Users\\\\mdk80\\\\OneDrive\\\\Desktop\\\\devops\\\\test.html\")",
+      "PowerShell(Start-Process \"C:\\\\Users\\\\mdk80\\\\OneDrive\\\\Desktop\\\\devops\\\\standalone.html\")",
+      "PowerShell(node C:\\\\Users\\\\mdk80\\\\OneDrive\\\\Desktop\\\\devops\\\\test-python.js)",
+      "PowerShell(Rename-Item *)",
+      "PowerShell(Start-Process \"C:\\\\Users\\\\mdk80\\\\OneDrive\\\\Desktop\\\\devops\\\\clear-auth.html\")"
+    ]
+  }
+}

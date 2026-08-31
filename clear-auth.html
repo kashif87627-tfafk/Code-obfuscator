@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Auth Data</title>
+  <style>
+    body { font-family: monospace; padding: 40px; background: #1a1a1a; color: #0f0; text-align: center; }
+    button { padding: 15px 30px; font-size: 16px; background: #f00; color: #fff; border: none; cursor: pointer; margin: 10px; }
+    .success { color: #0f0; margin-top: 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h1>Clear CodeMask Auth Data</h1>
+  <p>Click below to remove all saved user accounts and sessions.</p>
+  <button onclick="clearData()">Clear All Auth Data</button>
+  <div id="status"></div>
+
+  <script>
+    function clearData() {
+      localStorage.removeItem('cm_users');
+      localStorage.removeItem('cm_session');
+      document.getElementById('status').innerHTML = '<div class="success">Auth data cleared! You can now close this page.</div>';
+      console.log('Cleared: cm_users, cm_session');
+    }
+
+    // Auto-clear on page load
+    window.onload = () => {
+      clearData();
+    };
+  </script>
+</body>
+</html>
